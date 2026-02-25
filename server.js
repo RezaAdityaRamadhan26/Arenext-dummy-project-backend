@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import createVenue from './src/controllers/venueController.js';
 
 dotenv.config();
 
@@ -8,6 +9,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
+app.use("/api/venues", createVenue);
 
 app.use(express.json());
 
