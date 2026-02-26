@@ -1,14 +1,16 @@
-import { Prisma } from "@prisma/client";
-import { success } from "zod";
+import prisma from '../prisma.js'
 
-export const createVenue = (req, res) => {
-    const {name, description, pricePerHour} = req.body; // logika untuk membuat venue baru
-    const newVenue = {
-      name: name,
-      description: description,
-      pricePerHour: pricePerHour,
-    };
+export const createVenue = async (req, res) => {
     try {
+        const {name, description, pricePerHour} = req.body; // logika untuk membuat venue baru
+        const newVenue = await prisma.venue.create({
+            data: {
+                name: name,
+                description: description,
+                pricePerHour: pricePerHour,
+            }
+        });
+
         res.status(201).json({
             message: "venue berhasil dibuat",
             status: 201,
@@ -23,19 +25,35 @@ export const createVenue = (req, res) => {
     }
 };
 
+export const getAllVenue = async (req, res) => {
+    try {
+        const venue = await prisma.venue.findMany();
+        res.status(200).json({
+            success: true,
+            data: venues
+        })
+    } catch (error) {
+        res.status(500).json({
+            success: false, 
+            data: venues, 
+            message: "gagal menampilkan seluruh venue"
+        })
+    }
+}
+
 export const getVenueById = async (req, res) => {
     try {
+        const id = Number(id);
+
         const venue = await prisma.venue.findUnique({
             where : {
-                id: userId
+                id: id
             }
         });
-        const id = req.params.id
-        const userId = Number(id);
         if (!venue) {
-            res.status(404).json({
+            return res.status(404).json({
                 success: false,
-                message: "Venue not found"
+                message: "venue tidak ditemukan"
             });
         } else {
             res.status(200).json({
@@ -55,7 +73,7 @@ export const updateVenue = async (req, res) => {
     try {
         const id = Number(req.params.id)
         const { name, description, pricePerHour, image } = req.body;
-        const updateVenue = await prisma.venue.update({
+        const updatedVenue = await prisma.venue.update({
             where: {
                 id: id
             },
@@ -70,7 +88,7 @@ export const updateVenue = async (req, res) => {
         res.status(200).json({
             success:true,
             message:"berhasil mengupdate venue",
-            data:updatedVenue
+            data: updatedVenue
         })
         
     } catch (error) {
@@ -84,17 +102,11 @@ export const updateVenue = async (req, res) => {
 
 export const deleteVenue = async(req, res) => {
     try {
-        const id = req.params.id
-            const updateVenue = await prisma.venue.delete({
+        const id = Number(req.params.id)
+            await prisma.venue.delete({
                 where: {
                     id: id,
-                },
-                data: {
-                    name: name,
-                    description: description,
-                    pricePerHour: pricePerHour,
-                    image: image,
-                },
+                }
             });
                 res.status(200).json({
                     success: true, 
