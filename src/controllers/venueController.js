@@ -2,7 +2,7 @@ import prisma from '../prisma.js'
 
 export const createVenue = async (req, res) => {
     try {
-        const {name, description, pricePerHour} = req.body; // logika untuk membuat venue baru
+        const {name, description, pricePerHour} = req.body; 
         const newVenue = await prisma.venue.create({
             data: {
                 name: name,
@@ -30,7 +30,7 @@ export const getAllVenue = async (req, res) => {
         const venue = await prisma.venue.findMany();
         res.status(200).json({
             success: true,
-            data: venues
+            data: venue
         })
     } catch (error) {
         res.status(500).json({
@@ -43,11 +43,12 @@ export const getAllVenue = async (req, res) => {
 
 export const getVenueById = async (req, res) => {
     try {
-        const id = Number(id);
+        const id = req.params.id;
+        const userId = Number(id);
 
         const venue = await prisma.venue.findUnique({
             where : {
-                id: id
+                id: userId
             }
         });
         if (!venue) {
@@ -72,7 +73,7 @@ export const getVenueById = async (req, res) => {
 export const updateVenue = async (req, res) => {
     try {
         const id = Number(req.params.id)
-        const { name, description, pricePerHour, image } = req.body;
+        const { name, description, pricePerHour } = req.body;
         const updatedVenue = await prisma.venue.update({
             where: {
                 id: id
@@ -80,9 +81,7 @@ export const updateVenue = async (req, res) => {
             data: {
                 name: name,
                 description: description,
-                pricePerHour: pricePerHour,
-                image: image
-                
+                pricePerHour: pricePerHour                
             }
         });
         res.status(200).json({
