@@ -3,11 +3,14 @@ import prisma from '../prisma.js'
 export const createVenue = async (req, res) => {
     try {
         const {name, description, pricePerHour} = req.body; 
+        const imagePath = req.file ? `/uploads/venues/${req.file.filename}` : null;
+
         const newVenue = await prisma.venue.create({
             data: {
                 name: name,
                 description: description,
-                pricePerHour: pricePerHour,
+                pricePerHour: Number(pricePerHour),
+                image: imagePath
             }
         });
 
@@ -35,8 +38,8 @@ export const getAllVenue = async (req, res) => {
     } catch (error) {
         res.status(500).json({
             success: false, 
-            data: venues, 
-            message: "gagal menampilkan seluruh venue"
+            message: "gagal menampilkan seluruh venue",
+            error: error.message
         })
     }
 }

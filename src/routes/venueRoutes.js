@@ -1,4 +1,5 @@
 import express from 'express';
+import { uploadVenueImage } from '../middlewares/uploadMiddleware.js';
 import {
   createVenue,
   getAllVenue,
@@ -9,9 +10,8 @@ import { authenticateToken, authorizeAdmin } from '../middlewares/authMiddleware
 
 const router = express.Router();
 
-router.post('/', createVenue)
 router.get('/', getAllVenue)
-router.post('/', authenticateToken, authorizeAdmin)
+router.post('/', authenticateToken, authorizeAdmin, uploadVenueImage.single('image'), createVenue)
 
 router.put('/:id', updateVenue)
 router.delete('/:id', deleteVenue)

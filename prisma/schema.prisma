@@ -36,7 +36,7 @@ model Venue {
     description  String?   // "?" boleh kosong
     pricePerHour Int       
     createdAt    DateTime  @default(now())
-    image        String?
+    image        String
 
     bookings     Booking[]
 }

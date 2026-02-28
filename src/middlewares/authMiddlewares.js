@@ -26,12 +26,11 @@ export const authenticateToken = (req, res, next) => {
 }
 
 export const authorizeAdmin = (req, res, next) => {
-    if (!req.user.role !== "ADMIN") {
+    if (req.user.role !== "ADMIN") {
         return res.status(403).json({
-            message: "fitur ini khusus admin, tidak bisa"
+            message: "fitur ini khusus admin, tidak bisa",
         })
     }
 
     next();
-
 }
