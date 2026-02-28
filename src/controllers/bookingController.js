@@ -2,7 +2,10 @@ import prisma from '../prisma.js'
 
 export const createBooking = async (req, res) => {
   try {
-    const { userId, venueId, date, hours, totalPrice } = req.body;
+    const { venueId, date, hours, totalPrice } = req.body;
+    const userId  = req.user.id
+
+    next();
 
     const newBooking = await prisma.booking.create({
       data: {
@@ -21,7 +24,7 @@ export const createBooking = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
         success: false,
         message: "gagal booking venue",
         error: error.message

@@ -5,11 +5,11 @@ import {
     getAllBooking,
     updateBookingStatus
 } from '../controllers/bookingController.js';
+import { authenticateToken  } from '../middlewares/authMiddlewares.js'
 
 const router = express.Router()
 
-router.post('/', createBooking)
 router.get('/', getAllBooking)
-router.put('/:id/status', updateBookingStatus)
+router.post('/:id/status', authenticateToken, updateBookingStatus)
 
 export default router;
