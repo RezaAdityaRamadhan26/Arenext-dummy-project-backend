@@ -16,4 +16,4 @@ router.post('/', authenticateToken, authorizeAdmin, uploadVenueImage.single('ima
 router.put('/:id', updateVenue)
 router.delete('/:id', deleteVenue)
 
-export default router;
+export default router;  
