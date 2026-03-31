@@ -6,7 +6,7 @@ export const authenticateToken = (req, res, next) => {
     const token = authHeader && authHeader.split(" ")[1];
 
     if (!token) {
-        res.status(400).json({
+        return res.status(400).json({
             message: "token gagal atau tidak ada"
         })
     }

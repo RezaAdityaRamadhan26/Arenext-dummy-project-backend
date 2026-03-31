@@ -84,7 +84,7 @@ export const updateVenue = async (req, res) => {
             data: {
                 name: name,
                 description: description,
-                pricePerHour: pricePerHour                
+                pricePerHour: Number(pricePerHour)                
             }
         });
         res.status(200).json({
