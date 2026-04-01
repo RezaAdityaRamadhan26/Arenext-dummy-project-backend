@@ -1,16 +1,34 @@
 import prisma from '../prisma.js'
+import { v2 as cloudinary } from 'cloudinary'; 
+
+cloudinary.config({ 
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+  api_key: process.env.CLOUDINARY_API_KEY, 
+  api_secret: process.env.CLOUDINARY_API_SECRET 
+});
 
 export const createVenue = async (req, res) => {
     try {
         const {name, description, pricePerHour} = req.body; 
-        const imagePath = req.file ? `/uploads/venues/${req.file.filename}` : null;
+        let imageUrl = null; 
+
+        if (req.file) {
+            const b64 = Buffer.from(req.file.buffer).toString("base64");
+            const dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+            
+            const uploadResult = await cloudinary.uploader.upload(dataURI, {
+                folder: "arenext_venues", 
+            });
+            
+            imageUrl = uploadResult.secure_url; 
+        }
 
         const newVenue = await prisma.venue.create({
             data: {
                 name: name,
                 description: description,
                 pricePerHour: Number(pricePerHour),
-                image: imagePath
+                image: imageUrl 
             }
         });
 

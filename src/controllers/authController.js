@@ -79,7 +79,7 @@ export const userLogin = async (req, res) => {
                 role: user.role
             },
             process.env.JWT_SECRET, 
-            { expiresIn: "1d" }, // 1 hari token nya
+            { expiresIn: "2h" }, // 2 jam token nya
         );
         res.status(200).json({
             success: true,
