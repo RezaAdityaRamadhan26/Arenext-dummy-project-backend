@@ -30,6 +30,35 @@ export const createBooking = async (req, res) => {
   }
 };
 
+export const getMyBookings = async (req, res) => {
+    try {
+        const userId = req.user.id
+
+        const bookings = await prisma.booking.findMany({
+            where: {
+                userId: Number(userId)
+            },
+            include: {
+                venue: true
+            },
+            orderBy: {
+                id: 'desc'
+            }
+        });
+        res.status(200).json({
+            success: true,
+            message: "berhasil menampilkan data booking Anda",
+            data: bookings
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "gagal menampilkan data booking Anda",
+            error: error.message
+        });
+    }
+}
+
 
 export const getAllBooking = async (req, res) => {
     try {
