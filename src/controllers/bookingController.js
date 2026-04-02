@@ -5,15 +5,13 @@ export const createBooking = async (req, res) => {
     const { venueId, date, hours, totalPrice } = req.body;
     const userId  = req.user.id
 
-    next();
-
     const newBooking = await prisma.booking.create({
       data: {
         userId: Number(userId),
         venueId: Number(venueId),
-        date: date,
-        hours: hours,
-        totalPrice: totalPrice
+        date: new Date(date),
+        hours: Number(hours),
+        totalPrice: Number(totalPrice)
       }
     });
 
