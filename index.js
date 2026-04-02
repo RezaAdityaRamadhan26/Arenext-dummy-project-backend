@@ -23,7 +23,7 @@ app.use('/public', express.static('public'));
 
 app.use("/api/venues", venueRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/booking", bookingRoutes);
+app.use("/api/bookings", bookingRoutes);
 
 app.get('/', (req, res) => {
   res.send('berhasil!');
