@@ -10,7 +10,7 @@ import { authenticateToken, authorizeAdmin } from '../middlewares/authMiddleware
 
 const router = express.Router();
 
-router.get('/', getAllVenue)
+router.get('/:id', getAllVenue)
 router.post('/', authenticateToken, authorizeAdmin, uploadVenueImage.single('image'), createVenue)
 
 router.put('/:id', updateVenue)
