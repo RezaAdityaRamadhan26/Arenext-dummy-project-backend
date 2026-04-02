@@ -10,6 +10,7 @@ import { authenticateToken  } from '../middlewares/authMiddlewares.js'
 const router = express.Router()
 
 router.get('/', getAllBooking)
+router.post('/', authenticateToken, createBooking)
 router.post('/:id/status', authenticateToken, updateBookingStatus)
 
 export default router;
