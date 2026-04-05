@@ -26,6 +26,11 @@ model User {
     role      role      @default(USER) 
     createdAt DateTime  @default(now())
 
+    // field untuk verifikasi email
+    emailVerified           Boolean   @default(false)
+    verificationToken       String?   @unique
+    verificationTokenExpiry DateTime?
+
     // relasi data user dengan booking
     bookings  Booking[]
 }
