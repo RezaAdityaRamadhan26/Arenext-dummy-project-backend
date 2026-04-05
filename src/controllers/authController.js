@@ -4,11 +4,24 @@ import bcrypt from 'bcrypt';
 import { Resend } from 'resend';
 import crypto from 'crypto';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Inisialisasi dikosongkan dulu agar tidak crash saat startup
+let resend;
 
 export const userRegist = async (req, res) => {
     try {
         const { name, email, password } = req.body;
+        
+        // Cek API Key hanya saat dibutuhkan
+        if (!process.env.RESEND_API_KEY) {
+            console.error("ERROR: RESEND_API_KEY is missing in environment variables!");
+            return res.status(500).json({
+                success: false,
+                message: "Konfigurasi email server belum lengkap. Hubungi admin."
+            });
+        }
+
+        if (!resend) resend = new Resend(process.env.RESEND_API_KEY);
+
         const regist = await prisma.user.findUnique({
             where : {
                 email: email
@@ -24,9 +37,8 @@ export const userRegist = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Generate token verifikasi email
         const verificationToken = crypto.randomBytes(32).toString('hex');
-        const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // expired 24 jam
+        const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
         const newUser = await prisma.user.create({
             data: {
@@ -38,8 +50,8 @@ export const userRegist = async (req, res) => {
             }
         })
 
-        // Kirim email verifikasi via Resend
-        const verificationUrl = `${process.env.BACKEND_URL || 'http://localhost:3000'}/api/auth/verify-email?token=${verificationToken}`;
+        const backendUrl = process.env.BACKEND_URL || 'https://arenext-dummy-project-backend.vercel.app';
+        const verificationUrl = `${backendUrl}/api/auth/verify-email?token=${verificationToken}`;
 
         await resend.emails.send({
             from: 'Arenext <onboarding@resend.dev>',
@@ -58,7 +70,6 @@ export const userRegist = async (req, res) => {
                             </a>
                         </div>
                         <p style="color: #999; text-align: center; font-size: 13px;">Link ini akan kedaluwarsa dalam <strong>24 jam</strong>.</p>
-                        <p style="color: #999; text-align: center; font-size: 13px;">Jika kamu tidak merasa mendaftar, abaikan email ini.</p>
                         <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
                         <p style="color: #bbb; text-align: center; font-size: 12px;">© 2024 Arenext. All rights reserved.</p>
                     </div>
@@ -76,6 +87,7 @@ export const userRegist = async (req, res) => {
             }
         })
     } catch (error) {
+        console.error("Registration Error:", error);
         res.status(500).json({
             success: false,
             message: "server error",
@@ -110,7 +122,6 @@ export const userLogin = async (req, res) => {
             });
         }
 
-        // Cek apakah email sudah diverifikasi
         if (!user.emailVerified) {
             return res.status(403).json({
                 success: false,
@@ -125,7 +136,7 @@ export const userLogin = async (req, res) => {
                 role: user.role
             },
             process.env.JWT_SECRET, 
-            { expiresIn: "2h" }, // 2 jam token nya
+            { expiresIn: "2h" },
         );
         res.status(200).json({
             success: true,
@@ -154,26 +165,22 @@ export const verifyEmail = async (req, res) => {
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
 
         if (!token) {
-            // Redirect ke frontend dengan pesan error
             return res.redirect(`${frontendUrl}?verified=false&error=token_not_found`);
         }
 
-        // Cari user dengan token yang cocok dan belum expired
         const user = await prisma.user.findFirst({
             where: {
                 verificationToken: token,
                 verificationTokenExpiry: {
-                    gt: new Date() // token masih berlaku (belum expired)
+                    gt: new Date()
                 }
             }
         });
 
         if (!user) {
-            // Token tidak valid atau sudah expired
             return res.redirect(`${frontendUrl}?verified=false&error=token_invalid_or_expired`);
         }
 
-        // Tandai email sebagai sudah diverifikasi & hapus token
         await prisma.user.update({
             where: { id: user.id },
             data: {
@@ -183,10 +190,10 @@ export const verifyEmail = async (req, res) => {
             }
         });
 
-        // Redirect ke halaman utama frontend dengan notif sukses
         return res.redirect(`${frontendUrl}?verified=true`);
 
     } catch (error) {
+        console.error("Verification Error:", error);
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
         return res.redirect(`${frontendUrl}?verified=false&error=server_error`);
     }
